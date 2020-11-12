@@ -7,13 +7,16 @@ var engine, world;
 var box1, pig1,pig3;
 var backgroundImg,platform;
 var bird, slingshot;
-
+var birds = []
+var flying,select
 var gameState = "onSling";
 var bg = "sprites/bg1.png";
 var score = 0;
-
+var restart
 function preload() {
     getBackgroundImg();
+    flying=loadSound("sounds/flying.mp3")
+    select=loadSound("sounds/select.mp3")
 }
 
 function setup(){
@@ -41,9 +44,15 @@ function setup(){
     log5 = new Log(870,120,150, -PI/7);
 
     bird = new Bird(200,50);
-
+    bird2=new Bird(150,170)
+    bird3 = new Bird(100,170)
     //log6 = new Log(230,180,80, PI/2);
     slingshot = new SlingShot(bird.body,{x:200, y:50});
+    birds.push(bird3)
+    birds.push(bird2)
+    birds.push(bird)
+    restart=createImg("sounds/refresh.png")
+    restart.position(15,10)
 }
 
 function draw(){
@@ -75,26 +84,52 @@ function draw(){
     log5.display();
 
     bird.display();
+    bird2.displayyellow();
+    bird3.displayblue();
+
     platform.display();
     //log6.display();
-    slingshot.display();    
+    slingshot.display(); 
+    if (gameState==="launched"){
+        if (birds.length>0){
+            fill(146,42,42)
+            text("Press Space For Next Bird",480,50)
+        }
+        else{
+            fill(146,42,42)
+            text("Press 'Reload' To Restart Game",450,50)
+        }
+        if (score===400){
+            gameState="endState"
+        }
+    }  if(gameState==="endState"){
+        fill(146,42,42)
+        text("GAME OVER!! Press 'Reload' To Restart Game",450,50)
+    } 
+    restart.mousePressed(reset)
 }
 
 function mouseDragged(){
-    //if (gameState!=="launched"){
-        Matter.Body.setPosition(bird.body, {x: mouseX , y: mouseY});
-    //}
+     if (gameState!=="launched" && mouseX>=0 && mouseX<200){
+        Matter.Body.setPosition(birds[birds.length-1].body, {x: mouseX , y: mouseY});
+        
+    }
 }
 
 
 function mouseReleased(){
     slingshot.fly();
     gameState = "launched";
+    flying.play()
+    birds.pop();
 }
 
 function keyPressed(){
-    if(keyCode === 32){
-       slingshot.attach(bird.body);
+    if(keyCode === 32 && gameState==="launched"){
+       Matter.Body.setPosition(birds[birds.length-1].body, {x: 200 , y: 50});
+       slingshot.attach(birds[birds.length-1].body)
+       gameState="onSling"
+       
     }
 }
 
@@ -115,3 +150,7 @@ async function getBackgroundImg(){
     backgroundImg = loadImage(bg);
     console.log(backgroundImg);
 }
+function reset(){
+    location.reload();
+}
+    
