@@ -57,8 +57,12 @@ function setup(){
 
 function draw(){
     if(backgroundImg)
-        background(backgroundImg);
-    
+       { background(backgroundImg);
+       }
+       else{
+           backgroundImage=loadImg("sprites/bg.png")
+           background(backgroundImage)
+       }
         noStroke();
         textSize(35)
         fill("white")
